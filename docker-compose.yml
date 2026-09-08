@@ -1,0 +1,88 @@
+version: '3.8'
+
+networks:
+  isp-ai-network:
+    driver: bridge
+
+volumes:
+  chroma_data:
+  generated_charts:
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1. VECTOR DATABASE: ChromaDB (RAG Knowledge Base)
+  # ---------------------------------------------------------------------------
+  chromadb:
+    image: chromadb/chroma:0.4.24
+    container_name: isp_chromadb
+    ports:
+      - "127.0.0.1:8001:8000"
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+    volumes:
+      - chroma_data:/chroma/chroma
+    networks:
+      - isp-ai-network
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # 2. PYTHON DATA AGENT: Analytics Engine, SQL & Seaborn Plotting
+  # ---------------------------------------------------------------------------
+  data_agent:
+    build:
+      context: ./data_agent
+      dockerfile: Dockerfile
+    container_name: isp_data_agent
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      - PORT=8000
+      - DB_PATH=/app/database/intesa_core_banking.db
+    volumes:
+      - generated_charts:/app/static/charts
+    networks:
+      - isp-ai-network
+    depends_on:
+      - chromadb
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # 3. NODE.JS ORCHESTRATOR: LangChain ReAct, Agentic Tools & Mail Service
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: isp_backend_orchestrator
+    ports:
+      - "127.0.0.1:5000:5000"
+    env_file:
+      - .env
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - DATA_AGENT_URL=http://data_agent:8000
+      - CHROMADB_URL=http://chromadb:8000
+    networks:
+      - isp-ai-network
+    depends_on:
+      - data_agent
+      - chromadb
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # 4. REACT FRONTEND: Executive Dashboard UI & Interactive Canvas
+  # ---------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: isp_frontend_ui
+    ports:
+      - "127.0.0.1:3000:80"
+    networks:
+      - isp-ai-network
+    depends_on:
+      - backend
+    restart: unless-stopped

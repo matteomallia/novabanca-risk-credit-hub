@@ -1,0 +1,111 @@
+# =============================================================================
+# RENDER BLUEPRINT — Intesa Sanpaolo Risk & Credit Intelligence Hub
+# =============================================================================
+# Come usarlo:
+#   1. Pusha questo repo su GitHub.
+#   2. Su https://dashboard.render.com -> New -> Blueprint -> collega il repo.
+#   3. Render legge questo file e propone i 4 servizi sotto: clicca "Apply".
+#   4. Imposta il secret OPENAI_API_KEY sul servizio "isp-backend" quando richiesto.
+#   5. Dopo il primo deploy, copia l'URL pubblico di "isp-backend"
+#      (tipo https://isp-backend-xxxx.onrender.com) e impostalo come
+#      VITE_API_BASE_URL sul servizio "isp-frontend", poi fai un redeploy manuale
+#      del solo frontend (Render non risolve automaticamente riferimenti
+#      incrociati tra un web service e una static site in questo file).
+#
+# NOTA SUL FREE TIER:
+#   - I servizi "private" (chromadb, data_agent) e il web service backend, sul
+#     piano free, NON hanno un filesystem persistente: il DB SQLite va quindi
+#     incluso nell'immagine Docker (come già avviene, essendo dentro
+#     data_agent/database/), mentre l'indice ChromaDB e i grafici PNG generati
+#     si azzerano ad ogni riavvio/redeploy. Per una demo va benissimo; per un
+#     uso reale servirebbe un piano con "disk" persistente.
+#   - I servizi free si "addormentano" dopo un periodo di inattività: la prima
+#     richiesta dopo un po' di silenzio può richiedere ~30-60s (cold start).
+
+services:
+  # ---------------------------------------------------------------------------
+  # 1. ChromaDB — Vector Store per il RAG (servizio privato, solo uso interno)
+  # ---------------------------------------------------------------------------
+  - type: pserv
+    name: isp-chromadb
+    runtime: image
+    image:
+      url: docker.io/chromadb/chroma:0.4.24
+    envVars:
+      - key: IS_PERSISTENT
+        value: "TRUE"
+      - key: PERSIST_DIRECTORY
+        value: /chroma/chroma
+    plan: free
+
+  # ---------------------------------------------------------------------------
+  # 2. Data Agent Python — FastAPI, Pandas, Seaborn (servizio privato)
+  # ---------------------------------------------------------------------------
+  - type: pserv
+    name: isp-data-agent
+    runtime: docker
+    rootDir: data_agent
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: "8000"
+      - key: DB_PATH
+        value: /app/database/intesa_core_banking.db
+    plan: free
+
+  # ---------------------------------------------------------------------------
+  # 3. Backend Node.js — Orchestratore ReAct (servizio PUBBLICO, chiamato dal frontend)
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: isp-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/market-news
+    envVars:
+      - key: PORT
+        value: "5000"
+      - key: NODE_ENV
+        value: production
+      # TODO dopo il primo deploy: sostituisci con l'hostname interno reale
+      # mostrato nella pagina del servizio "isp-data-agent" / "isp-chromadb"
+      - key: DATA_AGENT_URL
+        value: http://isp-data-agent:8000
+      - key: CHROMADB_URL
+        value: http://isp-chromadb:8000
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: MARKETAUX_API_KEY
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+    plan: free
+
+  # ---------------------------------------------------------------------------
+  # 4. Frontend React — Sito statico servito da Render (build Vite)
+  # ---------------------------------------------------------------------------
+  - type: web
+    name: isp-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      # TODO dopo il primo deploy del backend: incolla qui il suo URL pubblico
+      # (es. https://isp-backend-xxxx.onrender.com), poi fai un redeploy manuale
+      - key: VITE_API_BASE_URL
+        value: ""
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

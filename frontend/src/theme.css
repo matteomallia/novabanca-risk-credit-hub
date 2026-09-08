@@ -1,0 +1,36 @@
+/*
+ * Variabili CSS del tema — driver del sistema di theming dinamico.
+ *
+ * Ogni valore è una tripletta "R G B" (senza virgole, senza rgb()) cosi' che
+ * Tailwind possa comporla con un canale alpha variabile via
+ * rgb(var(--x) / <alpha-value>) — vedi tailwind.config.js.
+ *
+ * - I selettori qui sotto definiscono i DEFAULT (tema Intesa Sanpaolo, dark).
+ * - src/theme.js sovrascrive --brand-primary/--brand-secondary a runtime
+ *   quando l'utente sceglie un colore custom nel wizard "Configura il tuo Hub".
+ * - La classe .light sull'elemento <html> attiva la variante chiara qui sotto.
+ */
+
+:root {
+  /* Colori di brand di default: Intesa Sanpaolo */
+  --brand-primary: 0 90 156;      /* #005A9C */
+  --brand-secondary: 255 102 0;   /* #FF6600 */
+
+  /* Superfici/testo: DARK MODE (default) */
+  --brand-bg: 15 23 42;           /* slate-900, ex isp-dark */
+  --brand-surface: 15 23 42;      /* pannelli/card */
+  --brand-surface-alt: 30 41 59;  /* elementi secondari, input, badge */
+  --brand-border: 30 41 59;
+  --brand-text: 241 245 249;
+  --brand-text-muted: 148 163 184;
+}
+
+/* Modalità chiara: attivata aggiungendo la classe "light" su <html> (vedi theme.js) */
+html.light {
+  --brand-bg: 248 250 252;        /* slate-50 */
+  --brand-surface: 255 255 255;   /* bianco */
+  --brand-surface-alt: 241 245 249; /* slate-100 */
+  --brand-border: 226 232 240;    /* slate-200 */
+  --brand-text: 15 23 42;         /* slate-900 */
+  --brand-text-muted: 100 116 139; /* slate-500 */
+}

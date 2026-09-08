@@ -1,0 +1,12 @@
+= INTESA SANPAOLO - MANUALE OPERATIVO GESTIONE NPL E CREDITI DETERIORATI =
+
+1. CLASSIFICAZIONE DEGLI EXPOSURES
+I crediti deteriorati si dividono in tre categorie principali secondo la normativa EBA e le linee guida Banca d'Italia:
+a) Esposizioni Scadute e/o Sconfinanti Deteriorate (Past Due): Crediti con ritardo nei pagamenti continuativo da oltre 90 giorni.
+b) Inadempienze Probabili (Unlikely to Pay - UTP): Crediti per i quali si ritiene improbabile il recupero totale senza il ricorso ad azioni come la escussione delle garanzie.
+c) Sofferenze (Bad Loans): Esposizioni verso soggetti in stato di insolvenza o in situazioni equiparabili.
+
+2. STRATEGIE DI RECOVERY E RISTRUTTURAZIONE
+- Entro 30 giorni dal primo ritardo: Invio primo sollecito automatico via PEC / SMS.
+- Entro 60 giorni dal primo ritardo: Contatto telefonico da parte del Credit Recovery Officer.
+- Superati i 90 giorni (Flag_Default_12M = 1): Trasferimento automatico della pratica al Dipartimento Non-Performing Loans (NPL). Si valuta il piano di rientro straordinario o l'avvio della procedura giudiziale.

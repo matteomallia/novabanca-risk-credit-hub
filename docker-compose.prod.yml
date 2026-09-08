@@ -1,0 +1,43 @@
+# =============================================================================
+# OVERRIDE PER LA PRODUZIONE (uso su VPS)
+# =============================================================================
+# Uso: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# Il file docker-compose.yml di base vincola già tutte le porte interne a
+# 127.0.0.1 (funziona identico in locale, ma non è raggiungibile dall'esterno
+# del server). Questo override aggiunge solo il servizio "caddy" come unico
+# punto di ingresso pubblico (porte 80/443), con certificato HTTPS Let's
+# Encrypt gestito in automatico.
+#
+# NOTA TECNICA: Docker Compose CONCATENA le liste "ports" tra più file invece
+# di sostituirle — per questo il binding sicuro va impostato nel file base
+# (dove infatti è già presente) e non ripetuto qui, altrimenti si otterrebbero
+# due porte pubblicate invece di una sola.
+#
+# Prerequisiti sul server:
+#   - Un dominio con il record DNS A che punta all'IP pubblico del VPS.
+#   - Nel file .env, impostare: DOMAIN=tuodominio.it
+#   - Firewall (es. ufw) che lascia aperte SOLO le porte 22 (SSH), 80 e 443.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: isp_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - .env
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - isp-ai-network
+    depends_on:
+      - frontend
+
+volumes:
+  caddy_data:
+  caddy_config:

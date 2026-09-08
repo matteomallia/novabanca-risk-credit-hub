@@ -1,0 +1,112 @@
+name: Intesa Sanpaolo AI Hub - CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # JOB 1: LINT & TEST PYTHON DATA AGENT
+  # ---------------------------------------------------------------------------
+  test-data-agent:
+    name: Test Python Data Agent
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f data_agent/requirements.txt ]; then pip install -r data_agent/requirements.txt; fi
+          pip install pytest flake8
+
+      - name: Linting Python Code (Flake8)
+        run: |
+          # Interrompe la build se ci sono errori di sintassi Python
+          flake8 data_agent --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Warning per stile e complessità
+          flake8 data_agent --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+  # ---------------------------------------------------------------------------
+  # JOB 2: LINT & TEST NODE.JS BACKEND ORCHESTRATOR
+  # ---------------------------------------------------------------------------
+  test-backend:
+    name: Test Node.js Backend Orchestrator
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install Dependencies
+        run: |
+          cd backend
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Run Backend Syntax Check / Build
+        run: |
+          cd backend
+          npm run build --if-present
+
+  # ---------------------------------------------------------------------------
+  # JOB 3: TEST REACT FRONTEND BUILD
+  # ---------------------------------------------------------------------------
+  test-frontend:
+    name: Test React Frontend Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies & Verify Build
+        run: |
+          cd frontend
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          npm run build
+
+  # ---------------------------------------------------------------------------
+  # JOB 4: DOCKER COMPOSE INTEGRATION BUILD TEST
+  # ---------------------------------------------------------------------------
+  docker-build-check:
+    name: Docker Multi-Container Build Test
+    needs: [test-data-agent, test-backend, test-frontend]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Create Dummy Asset Directories
+        run: |
+          mkdir -p data_agent/database
+          mkdir -p backend/docs
+          touch data_agent/database/intesa_core_banking.db
+
+      - name: Build Docker Images with Docker Compose
+        run: |
+          docker compose build

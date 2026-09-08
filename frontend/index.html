@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Intesa Sanpaolo | Risk & Credit Intelligence Hub</title>
+
+    <!-- Google Fonts: Inter per leggibilità di tipo Financial/Enterprise -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* Stile base prima del montaggio di React per evitare FOUC (Flash of Unstyled Content) */
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background-color: #0f172a; /* Slate 900 aziendale per tema Dark Executive */
+        color: #f8fafc;
+        overflow-x: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Punto di aggancio per l'applicazione React -->
+    <div id="root"></div>
+
+    <!-- Entry point dell'applicazione React tramite Vite -->
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

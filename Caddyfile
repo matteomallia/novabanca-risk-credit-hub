@@ -1,0 +1,24 @@
+# Caddyfile — reverse proxy con HTTPS automatico (Let's Encrypt) per la produzione.
+#
+# {$DOMAIN} viene letto dalla variabile d'ambiente DOMAIN (impostata nel file .env
+# sul server). Se non impostata, Caddy usa "localhost" e serve solo in HTTP,
+# utile per un primo test rapido senza dominio configurato.
+{$DOMAIN:localhost} {
+    reverse_proxy frontend:80
+
+    # Compressione automatica delle risposte (gzip/zstd)
+    encode gzip zstd
+
+    # Header di sicurezza di base
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}
