@@ -1,4 +1,4 @@
-= INTESA SANPAOLO - MANUALE OPERATIVO GESTIONE NPL E CREDITI DETERIORATI =
+= NOVABANCA - MANUALE OPERATIVO GESTIONE NPL E CREDITI DETERIORATI =
 
 1. CLASSIFICAZIONE DEGLI EXPOSURES
 I crediti deteriorati si dividono in tre categorie principali secondo la normativa EBA e le linee guida Banca d'Italia:

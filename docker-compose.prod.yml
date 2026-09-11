@@ -22,7 +22,7 @@
 services:
   caddy:
     image: caddy:2-alpine
-    container_name: isp_caddy
+    container_name: nvb_caddy
     restart: unless-stopped
     ports:
       - "80:80"
@@ -34,7 +34,7 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     networks:
-      - isp-ai-network
+      - nvb-ai-network
     depends_on:
       - frontend
 

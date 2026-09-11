@@ -1,4 +1,4 @@
-# Intesa Sanpaolo — Risk & Credit Intelligence Hub
+# NovaBanca — Risk & Credit Intelligence Hub
 
 Agente AI ibrido e multi-tool per il reparto **Risk & Credit** di una banca:
 un'unica interfaccia conversazionale capace di decidere autonomamente se
@@ -6,8 +6,8 @@ consultare la normativa creditizia (RAG su ChromaDB) o delegare un'analisi
 quantitativa a un Data Agent Python, generando grafici e sintesi narrative in
 tempo reale.
 
-> ⚠️ **Progetto didattico/dimostrativo.** Nessuna affiliazione con Intesa
-> Sanpaolo S.p.A. Dati interamente sintetici. Vedi [`DISCLAIMER.md`](./DISCLAIMER.md).
+> ⚠️ **Progetto didattico/dimostrativo.** Nessuna affiliazione con NovaBanca
+> NovaBanca S.p.A. Dati interamente sintetici. Vedi [`DISCLAIMER.md`](./DISCLAIMER.md).
 > Per il mapping puntuale di ogni requisito del brief al codice, vedi
 > [`COMPLIANCE.md`](./COMPLIANCE.md).
 
@@ -50,7 +50,7 @@ tempo reale.
                                                                     ▼
                                                           ┌────────────────────┐
                                                           │    SQLite              │
-                                                          │    intesa_core_banking.db │
+                                                          │    novabanca_core_banking.db │
                                                           └────────────────────┘
 ```
 
@@ -98,7 +98,7 @@ trasmesso in streaming al frontend, visibile in tempo reale in chat.
 ├── frontend/              # React + Vite + Tailwind (interfaccia chat, dashboard, wizard)
 ├── backend/                # Node.js + Express + LangChain.js (orchestratore ReAct)
 ├── data_agent/              # Python + FastAPI + Pandas + Seaborn (analisi dati)
-│   ├── database/              # intesa_core_banking.db (SQLite, dati sintetici)
+│   ├── database/              # novabanca_core_banking.db (SQLite, dati sintetici)
 │   └── tests/                  # Test Pytest
 ├── backend/docs/            # Documenti della Knowledge Base RAG (PDF/TXT/MD)
 ├── notebooks/               # Notebook Jupyter di prototipazione (vedi notebooks/README.md)
@@ -116,7 +116,7 @@ Prerequisiti: [Docker](https://www.docker.com/) e Docker Compose installati.
 ```bash
 # 1. Clona il repository
 git clone <URL_DEL_TUO_REPOSITORY>
-cd intesa-ai-hub-monorepo
+cd novabanca-risk-credit-hub
 
 # 2. Copia il file d'ambiente e inserisci la tua chiave OpenAI
 cp .env.example .env

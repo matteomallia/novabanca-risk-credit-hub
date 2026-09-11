@@ -50,7 +50,7 @@ def validate_readonly_select(query: str) -> str:
 # Configurazione backend headless per Matplotlib (evita errori in container Docker senza display GUI)
 matplotlib.use('Agg')
 
-# Stile visivo aziendale Intesa Sanpaolo per i grafici Seaborn
+# Stile visivo aziendale NovaBanca per i grafici Seaborn
 sns.set_theme(style="whitegrid")
 plt.rcParams.update({
     'font.size': 10,
@@ -61,13 +61,13 @@ plt.rcParams.update({
     'figure.titlesize': 14
 })
 
-COLOR_PRIMARY = "#005A9C"    # Blu Intesa Sanpaolo
+COLOR_PRIMARY = "#005A9C"    # Blu NovaBanca
 COLOR_SECONDARY = "#FF6600"  # Arancio Corporate
 COLOR_DANGER = "#D9534F"     # Rosso Rischio / Default
 
 
 class DataAgentEngine:
-    def __init__(self, db_path: str = "database/intesa_core_banking.db"):
+    def __init__(self, db_path: str = "database/novabanca_core_banking.db"):
         """
         Inizializza il motore d'analisi collegandolo al database SQLite relazionale.
         """
@@ -126,14 +126,14 @@ class DataAgentEngine:
             if df['Eta_Cliente'].isnull().any():
                 df['Eta_Cliente'] = df['Eta_Cliente'].fillna(df['Eta_Cliente'].median())
 
-        # 4. Outlier Removal su Credit_Score_ISP (range standard 300-850)
-        if 'Credit_Score_ISP' in df.columns:
-            df['Credit_Score_ISP'] = pd.to_numeric(df['Credit_Score_ISP'], errors='coerce')
+        # 4. Outlier Removal su Credit_Score_Interno (range standard 300-850)
+        if 'Credit_Score_Interno' in df.columns:
+            df['Credit_Score_Interno'] = pd.to_numeric(df['Credit_Score_Interno'], errors='coerce')
             # Clip dei valori fuori range (es. 950 o 999 portati al valore max 850)
-            df['Credit_Score_ISP'] = df['Credit_Score_ISP'].apply(
+            df['Credit_Score_Interno'] = df['Credit_Score_Interno'].apply(
                 lambda x: np.nan if (x < 300 or x > 850) else x
             )
-            df['Credit_Score_ISP'] = df['Credit_Score_ISP'].fillna(df['Credit_Score_ISP'].median())
+            df['Credit_Score_Interno'] = df['Credit_Score_Interno'].fillna(df['Credit_Score_Interno'].median())
 
         return df
 
@@ -216,8 +216,8 @@ class DataAgentEngine:
                 "SELECT SUM(Importo_Richiesto_EUR) FROM T_PRATICHE_FIDO"
             )
             avg_credit_score = scalar(
-                "SELECT AVG(Credit_Score_ISP) FROM T_PRATICHE_FIDO "
-                "WHERE Credit_Score_ISP BETWEEN 300 AND 850"
+                "SELECT AVG(Credit_Score_Interno) FROM T_PRATICHE_FIDO "
+                "WHERE Credit_Score_Interno BETWEEN 300 AND 850"
             )
             total_pratiche = scalar("SELECT COUNT(*) FROM T_PRATICHE_FIDO")
             default_pratiche = scalar(

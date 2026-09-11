@@ -10,7 +10,7 @@ const { ChromaClient } = require('chromadb');
 // Cartella contenente i 3 documenti normativi della Knowledge Base
 const DOCS_DIR = path.resolve(__dirname, '../../docs');
 const CHROMADB_URL = process.env.CHROMADB_URL || 'http://chromadb:8000';
-const COLLECTION_NAME = 'intesa_risk_knowledge_base';
+const COLLECTION_NAME = 'novabanca_risk_knowledge_base';
 
 const embeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_API_KEY,

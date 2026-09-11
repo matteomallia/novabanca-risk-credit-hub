@@ -5,12 +5,12 @@
 // simulare un flusso di accesso per la demo. Per un uso reale andrebbe
 // sostituito con un vero provider di identità (SSO aziendale, OAuth, ecc.).
 
-const THEME_STORAGE_KEY = 'isp_hub_theme';
-const SESSION_STORAGE_KEY = 'isp_hub_session';
+const THEME_STORAGE_KEY = 'nvb_hub_theme';
+const SESSION_STORAGE_KEY = 'nvb_hub_session';
 
 export const DEFAULT_THEME = {
-  companyName: 'Intesa Sanpaolo',
-  logoMark: 'ISP',
+  companyName: 'NovaBanca',
+  logoMark: 'NVB',
   primaryColor: '#005A9C',
   secondaryColor: '#FF6600',
   mode: 'dark' // 'dark' | 'light'
@@ -18,7 +18,7 @@ export const DEFAULT_THEME = {
 
 // Preset rapidi proposti nel wizard, per chi non vuole scegliere un colore da zero
 export const THEME_PRESETS = [
-  { id: 'isp', label: 'Intesa Sanpaolo (default)', primaryColor: '#005A9C', secondaryColor: '#FF6600' },
+  { id: 'nvb_default', label: 'NovaBanca (default)', primaryColor: '#005A9C', secondaryColor: '#FF6600' },
   { id: 'emerald_tech', label: 'Emerald Tech', primaryColor: '#047857', secondaryColor: '#0EA5E9' },
   { id: 'crimson_finance', label: 'Crimson Finance', primaryColor: '#9F1239', secondaryColor: '#F59E0B' },
   { id: 'violet_innovation', label: 'Violet Innovation', primaryColor: '#5B21B6', secondaryColor: '#EC4899' }

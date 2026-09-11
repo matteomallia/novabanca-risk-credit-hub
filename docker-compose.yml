@@ -1,7 +1,7 @@
 version: '3.8'
 
 networks:
-  isp-ai-network:
+  nvb-ai-network:
     driver: bridge
 
 volumes:
@@ -13,8 +13,8 @@ services:
   # 1. VECTOR DATABASE: ChromaDB (RAG Knowledge Base)
   # ---------------------------------------------------------------------------
   chromadb:
-    image: chromadb/chroma:0.4.24
-    container_name: isp_chromadb
+    image: chromadb/chroma:0.5.20
+    container_name: nvb_chromadb
     ports:
       - "127.0.0.1:8001:8000"
     environment:
@@ -23,7 +23,7 @@ services:
     volumes:
       - chroma_data:/chroma/chroma
     networks:
-      - isp-ai-network
+      - nvb-ai-network
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
@@ -33,16 +33,16 @@ services:
     build:
       context: ./data_agent
       dockerfile: Dockerfile
-    container_name: isp_data_agent
+    container_name: nvb_data_agent
     ports:
       - "127.0.0.1:8000:8000"
     environment:
       - PORT=8000
-      - DB_PATH=/app/database/intesa_core_banking.db
+      - DB_PATH=/app/database/novabanca_core_banking.db
     volumes:
       - generated_charts:/app/static/charts
     networks:
-      - isp-ai-network
+      - nvb-ai-network
     depends_on:
       - chromadb
     restart: unless-stopped
@@ -54,7 +54,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: isp_backend_orchestrator
+    container_name: nvb_backend_orchestrator
     ports:
       - "127.0.0.1:5000:5000"
     env_file:
@@ -65,7 +65,7 @@ services:
       - DATA_AGENT_URL=http://data_agent:8000
       - CHROMADB_URL=http://chromadb:8000
     networks:
-      - isp-ai-network
+      - nvb-ai-network
     depends_on:
       - data_agent
       - chromadb
@@ -78,11 +78,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: isp_frontend_ui
+    container_name: nvb_frontend_ui
     ports:
       - "127.0.0.1:3000:80"
     networks:
-      - isp-ai-network
+      - nvb-ai-network
     depends_on:
       - backend
     restart: unless-stopped

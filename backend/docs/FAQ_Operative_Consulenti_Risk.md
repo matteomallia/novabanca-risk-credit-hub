@@ -1,4 +1,4 @@
-# FAQ Operative - Consulenti Risk & Credit Intesa Sanpaolo
+# FAQ Operative - Consulenti Risk & Credit NovaBanca
 
 ### Q1: Qual e il tasso soglia usura attualmente in vigore per i finanziamenti personali?
 **R:** Ai sensi della legge 108/96 e secondo le rilevazioni trimestrali di Banca d'Italia, il Tasso Effettivo Globale Medio (TEGM) viene aggiornato con cadenza trimestrale. Per il trimestre corrente, la soglia di usura e calcolata aumentando il TEGM del 25% a cui si aggiungono ulteriori 4 punti percentuali.

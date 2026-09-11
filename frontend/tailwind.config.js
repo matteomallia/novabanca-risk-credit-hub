@@ -24,10 +24,10 @@ export default {
           text: 'rgb(var(--brand-text) / <alpha-value>)',
           textMuted: 'rgb(var(--brand-text-muted) / <alpha-value>)'
         },
-        // Mantenuta per retrocompatibilità: alias fissi sui colori ufficiali ISP,
-        // utili solo per elementi che devono restare SEMPRE blu/arancio ISP
+        // Mantenuta per retrocompatibilità: alias fissi sui colori ufficiali NVB,
+        // utili solo per elementi che devono restare SEMPRE blu/arancio NVB
         // indipendentemente dal tema custom scelto (es. il logo nella landing page).
-        isp: {
+        nvb: {
           blue: '#005A9C',
           orange: '#FF6600'
         }

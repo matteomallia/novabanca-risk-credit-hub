@@ -8,7 +8,7 @@ export const useChat = () => {
   const initialWelcomeMessage = {
     id: uid(),
     sender: 'bot',
-    text: "Benvenuto nel Risk & Credit Intelligence Hub di Intesa Sanpaolo. Sono il tuo assistente agentico. Come posso supportarti oggi nelle analisi di credito o nella consultazione normativa?",
+    text: "Benvenuto nel Risk & Credit Intelligence Hub di NovaBanca. Sono il tuo assistente agentico. Come posso supportarti oggi nelle analisi di credito o nella consultazione normativa?",
     timestamp: ts()
   };
 

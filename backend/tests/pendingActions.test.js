@@ -3,7 +3,7 @@ const { createPendingEmail, getPendingEmail, resolvePendingEmail } = require('..
 describe('pendingActions (guardrail email human-in-the-loop)', () => {
     test('createPendingEmail restituisce un id e getPendingEmail recupera i dati corretti', () => {
         const id = createPendingEmail({
-            recipient: 'management@intesasanpaolo.com',
+            recipient: 'management@novabanca.com',
             subject: 'Report Test',
             content: 'Contenuto di prova',
             chartPath: '/static/charts/chart_test.png'
@@ -13,7 +13,7 @@ describe('pendingActions (guardrail email human-in-the-loop)', () => {
 
         const entry = getPendingEmail(id);
         expect(entry).not.toBeNull();
-        expect(entry.recipient).toBe('management@intesasanpaolo.com');
+        expect(entry.recipient).toBe('management@novabanca.com');
         expect(entry.subject).toBe('Report Test');
         expect(entry.chartPath).toBe('/static/charts/chart_test.png');
     });

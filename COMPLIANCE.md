@@ -5,19 +5,19 @@ che lo soddisfa, per facilitare la valutazione tecnica del progetto.
 
 ## Scenario e ambito scelto
 
-**Azienda**: Intesa Sanpaolo (caso realistico ispirato all'azienda reale)
+**Azienda**: NovaBanca (caso realistico ispirato all'azienda reale)
 **Reparto/ambito**: Risk & Credit — analisi del rischio creditizio e consultazione
 normativa per consulenti/analisti di credito.
 
 Le due esigenze informative complementari richieste dal brief:
 - **Testuale**: policy di erogazione credito, manuale gestione NPL, FAQ operative → `backend/docs/`
-- **Numerica**: pratiche di fido, performance di rimborso, dati clienti/filiali → `data_agent/database/intesa_core_banking.db`
+- **Numerica**: pratiche di fido, performance di rimborso, dati clienti/filiali → `data_agent/database/novabanca_core_banking.db`
 
 ## Step preliminare: dati e knowledge base
 
 | Requisito | Stato | Dove |
 |---|---|---|
-| CSV/dataset ≥1000 righe | ✅ | `data_agent/database/intesa_core_banking.db` — 1200 record in `T_PRATICHE_FIDO`, generati con seed riproducibile in `notebooks/01_generazione_dataset_e_knowledge_base.ipynb` |
+| CSV/dataset ≥1000 righe | ✅ | `data_agent/database/novabanca_core_banking.db` — 1200 record in `T_PRATICHE_FIDO`, generati con seed riproducibile in `notebooks/01_generazione_dataset_e_knowledge_base.ipynb` |
 | Dati "sporchi" (nulli, duplicati, formati incoerenti, outlier) | ✅ | Iniezione controllata (~10-12%) nel notebook di generazione: reddito nullo (4%), età nulla (4%), spazi superflui nelle categorie (3%), outlier Credit Score fuori range 300-850 (3%). Puliti in `data_agent/agent_engine.py::clean_dataset()` |
 | Documento testuale/PDF per la KB | ✅ | `backend/docs/`: `Policy_Erogazione_Credito_2026.pdf`, `Manuale_Gestione_NPL_e_Crediti_Deteriorati.txt`, `FAQ_Operative_Consulenti_Risk.md` (3 documenti, oltre il minimo richiesto di 1) |
 

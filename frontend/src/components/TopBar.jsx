@@ -61,7 +61,7 @@ export const TopBar = ({ onClearChat, onOpenAgentSettings, agentConfig, theme, s
   const [marketData, setMarketData] = useState({
     ticker: [
       { symbol: 'FTSE MIB', price: '34.850,20', change: '+0.42%' },
-      { symbol: 'ISP.MI', price: '3.68 EUR', change: '+0.85%' },
+      { symbol: 'NVB.MI', price: '3.68 EUR', change: '+0.85%' },
       { symbol: 'EUR/USD', price: '1.0885', change: '-0.12%' },
       { symbol: 'BTP 10Y Yield', price: '3.54%', change: '-0.03%' }
     ],
@@ -99,7 +99,7 @@ export const TopBar = ({ onClearChat, onOpenAgentSettings, agentConfig, theme, s
 
   return (
     <header className="bg-brand-surface border-b border-brand-surfaceAlt text-brand-text shadow-md">
-      {/* 1. Header Principale con Branding ISP */}
+      {/* 1. Header Principale con Branding NVB */}
       <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center space-x-3">
           <div className="bg-brand-primary p-2 rounded-lg flex items-center justify-center text-white min-w-[2.5rem]">
@@ -111,7 +111,7 @@ export const TopBar = ({ onClearChat, onOpenAgentSettings, agentConfig, theme, s
           </div>
           <div>
             <h1 className="text-lg font-bold tracking-tight text-brand-text flex items-center gap-2">
-              {(theme?.companyName || 'INTESA SANPAOLO').toUpperCase()}
+              {(theme?.companyName || 'NOVABANCA').toUpperCase()}
               <span className="text-xs bg-brand-secondary/15 text-brand-secondary border border-brand-secondary/40 font-semibold px-2 py-0.5 rounded-full">
                 Risk & Credit Hub
               </span>

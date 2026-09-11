@@ -17,7 +17,7 @@ const DEFAULT_AGENT_CONFIG = {
 
 // L'applicazione vera e propria (post-login/post-wizard). Riceve il tema e la
 // sessione mock dal router in App.jsx, cosi' la TopBar può mostrare il
-// branding corretto (ISP di default, oppure quello scelto nel wizard).
+// branding corretto (NVB di default, oppure quello scelto nel wizard).
 export default function HubApp({ theme, session, onLogout, onOpenWizard }) {
   const [agentConfig, setAgentConfig] = useState(DEFAULT_AGENT_CONFIG);
   const [showAgentSettings, setShowAgentSettings] = useState(false);

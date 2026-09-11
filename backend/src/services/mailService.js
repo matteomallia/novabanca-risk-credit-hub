@@ -18,7 +18,7 @@ function createTransporter() {
 }
 
 /**
- * Genera il template HTML dell'email aziendale Intesa Sanpaolo
+ * Genera il template HTML dell'email aziendale NovaBanca
  * @param {string} recipientName - Nome del destinatario o dipartimento
  * @param {string} reportSummary - Sintesi redatta dall'LLM
  * @param {boolean} hasChart - Flag che indica se è presente un grafico allegato
@@ -48,7 +48,7 @@ function generateHtmlTemplate(recipientName, reportSummary, hasChart) {
     <body>
         <div class="container">
             <div class="header">
-                <h1>INTESA SANPAOLO</h1>
+                <h1>NOVABANCA</h1>
                 <p>Risk & Credit Intelligence Hub — Executive Report</p>
             </div>
             <div class="content">
@@ -66,11 +66,11 @@ function generateHtmlTemplate(recipientName, reportSummary, hasChart) {
                 ` : ''}
 
                 <p style="font-size: 13px; color: #718096; margin-top: 25px;">
-                    <em>Nota: Il presente documento è generato automaticamente da un agente AI e riservato ad uso interno aziendale del Gruppo Intesa Sanpaolo.</em>
+                    <em>Nota: Il presente documento è generato automaticamente da un agente AI e riservato ad uso interno aziendale del Gruppo NovaBanca.</em>
                 </p>
             </div>
             <div class="footer">
-                © 2026 Intesa Sanpaolo S.p.A. — Direzione Centrale Risk Management — Tutti i diritti riservati.
+                © 2026 NovaBanca S.p.A. — Direzione Centrale Risk Management — Tutti i diritti riservati.
             </div>
         </div>
     </body>
@@ -118,9 +118,9 @@ async function sendExecutiveReport({ to, subject, summary, chartPath }) {
         const htmlContent = generateHtmlTemplate(recipientName, summary, hasChart);
 
         const mailOptions = {
-            from: process.env.EMAIL_FROM || '"Intesa Sanpaolo Risk Hub" <risk-intelligence@intesasanpaolo.com>',
+            from: process.env.EMAIL_FROM || '"NovaBanca Risk Hub" <risk-intelligence@novabanca.com>',
             to: recipientEmail,
-            subject: subject || '📊 Intesa Sanpaolo — Executive Risk Report',
+            subject: subject || '📊 NovaBanca — Executive Risk Report',
             html: htmlContent,
             attachments: attachments
         };

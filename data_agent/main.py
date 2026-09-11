@@ -8,7 +8,7 @@ from agent_engine import DataAgentEngine, UnsafeQueryError
 
 # Inizializzazione applicazione FastAPI
 app = FastAPI(
-    title="Intesa Sanpaolo Risk Data Agent API",
+    title="NovaBanca Risk Data Agent API",
     description="Microservizio per l'esecuzione di query SQL, data cleaning con Pandas e generazione grafici con Seaborn.",
     version="1.0.0"
 )
@@ -28,7 +28,7 @@ os.makedirs(CHARTS_DIR, exist_ok=True)
 app.mount("/static/charts", StaticFiles(directory=CHARTS_DIR), name="charts")
 
 # Inizializzazione dell'Engine
-DB_PATH = os.getenv("DB_PATH", "database/intesa_core_banking.db")
+DB_PATH = os.getenv("DB_PATH", "database/novabanca_core_banking.db")
 agent_engine = DataAgentEngine(db_path=DB_PATH)
 
 

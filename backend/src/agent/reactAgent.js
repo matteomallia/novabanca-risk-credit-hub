@@ -30,7 +30,7 @@ const queryKnowledgeBaseTool = new DynamicTool({
         const ragResult = await queryKnowledgeBase(input);
         
         if (!ragResult || ragResult.includes("non disponibile") || ragResult.includes("Errore")) {
-            return `[KNOWLEDGE BASE BACKEND INTESA SANPAOLO]:
+            return `[KNOWLEDGE BASE BACKEND NOVABANCA]:
             I documenti ufficiali caricati nel sistema RAG sono:
             1. Policy_Erogazione_Credito_2026.pdf (Soglie DTI 35-40%, LTV max 80%, Credit Score minimo 620 pt)
             2. Manuale_Gestione_NPL_e_Crediti_Deteriorati.txt (Procedure di incaglio e sofferenza per ritardi >90 giorni)
@@ -45,20 +45,20 @@ const queryKnowledgeBaseTool = new DynamicTool({
  */
 const executeDataAnalyticsTool = new DynamicTool({
     name: "execute_data_analytics",
-    description: "Utile per eseguire query ed analisi sul database SQLite di Intesa Sanpaolo e generare grafici. Passa come input la query SQL pura senza punto finale.",
+    description: "Utile per eseguire query ed analisi sul database SQLite di NovaBanca e generare grafici. Passa come input la query SQL pura senza punto finale.",
     func: async (input) => {
         console.log(`[ReAct Agent Tool: Data Agent] Invocato con input: ${input}`);
         
         let querySql = "";
         let chartType = "bar";
-        let chartTitle = "Analisi Rischio Credito Intesa Sanpaolo";
+        let chartTitle = "Analisi Rischio Credito NovaBanca";
 
         try {
             if (typeof input === 'string' && input.trim().startsWith('{')) {
                 const parsed = JSON.parse(input);
                 querySql = parsed.query_sql || input;
                 chartType = parsed.chart_type || "bar";
-                chartTitle = parsed.chart_title || "Analisi Rischio Credito Intesa Sanpaolo";
+                chartTitle = parsed.chart_title || "Analisi Rischio Credito NovaBanca";
             } else {
                 querySql = String(input);
             }
@@ -117,11 +117,11 @@ const fetchMarketNewsTool = new DynamicTool({
     func: async (query) => {
         try {
             if (MARKETAUX_API_KEY && MARKETAUX_API_KEY !== 'your_marketaux_api_key_here') {
-                const url = `https://api.marketaux.com/v1/news/all?symbols=ISP.MI,FTSEMIB.MI&filter_entities=true&language=it&api_token=${MARKETAUX_API_KEY}`;
+                const url = `https://api.marketaux.com/v1/news/all?symbols=NVB.MI,FTSEMIB.MI&filter_entities=true&language=it&api_token=${MARKETAUX_API_KEY}`;
                 const response = await axios.get(url);
                 return response.data.data.slice(0, 3).map(a => `- ${a.title}: ${a.description}`).join("\n");
             } else {
-                return `[FTSE MIB LIVE MOCK]: Indice FTSE MIB 34.850pt (+0,42%), Intesa Sanpaolo 3,68 EUR (+0,85%).`;
+                return `[FTSE MIB LIVE MOCK]: Indice FTSE MIB 34.850pt (+0,42%), NovaBanca 3,68 EUR (+0,85%).`;
             }
         } catch (err) {
             return "Dati di mercato temporaneamente non disponibili.";
@@ -134,11 +134,11 @@ const fetchMarketNewsTool = new DynamicTool({
  */
 const sendExecutiveReportTool = new DynamicTool({
     name: "send_executive_report",
-    description: "Utile per PREPARARE (non inviare direttamente) un report sintetico di rischio da mandare via e-mail al management in formato HTML. L'invio reale avviene solo dopo conferma esplicita dell'utente nell'interfaccia: questo tool crea solo l'anteprima in attesa di approvazione. IMPORTANTE: l'input DEVE essere sempre una stringa JSON con i campi: \"to\" (l'indirizzo email destinatario: se l'utente lo specifica nel messaggio, es. \"manda il report a mario.rossi@intesasanpaolo.com\", USA ESATTAMENTE quell'indirizzo; se non specificato, ometti il campo), \"subject\" (oggetto dell'email), \"summary\" (la sintesi testuale del report, in italiano, con i numeri chiave), \"chartPath\" (opzionale: il chart_url restituito dall'ultima analisi dati eseguita in questa conversazione, se pertinente al report). Esempio di input corretto: {\"to\": \"mario.rossi@intesasanpaolo.com\", \"subject\": \"Report Esposizione Q3\", \"summary\": \"L'esposizione totale dei fidi è di 45.000.000 EUR...\", \"chartPath\": \"/static/charts/chart_abc123.png\"}",
+    description: "Utile per PREPARARE (non inviare direttamente) un report sintetico di rischio da mandare via e-mail al management in formato HTML. L'invio reale avviene solo dopo conferma esplicita dell'utente nell'interfaccia: questo tool crea solo l'anteprima in attesa di approvazione. IMPORTANTE: l'input DEVE essere sempre una stringa JSON con i campi: \"to\" (l'indirizzo email destinatario: se l'utente lo specifica nel messaggio, es. \"manda il report a mario.rossi@novabanca.com\", USA ESATTAMENTE quell'indirizzo; se non specificato, ometti il campo), \"subject\" (oggetto dell'email), \"summary\" (la sintesi testuale del report, in italiano, con i numeri chiave), \"chartPath\" (opzionale: il chart_url restituito dall'ultima analisi dati eseguita in questa conversazione, se pertinente al report). Esempio di input corretto: {\"to\": \"mario.rossi@novabanca.com\", \"subject\": \"Report Esposizione Q3\", \"summary\": \"L'esposizione totale dei fidi è di 45.000.000 EUR...\", \"chartPath\": \"/static/charts/chart_abc123.png\"}",
     func: async (input) => {
         try {
-            let recipient = process.env.SMTP_USER || "management@intesasanpaolo.com";
-            let subject = "Report Executive Risk & Credit - Intesa Sanpaolo";
+            let recipient = process.env.SMTP_USER || "management@novabanca.com";
+            let subject = "Report Executive Risk & Credit - NovaBanca";
             let content = String(input);
             let chartPath = null;
 
@@ -206,14 +206,14 @@ async function createReactAgentInstance(config = {}) {
         : "ATTENZIONE: nessun tool è abilitato in questa sessione (l'utente li ha disattivati dal pannello Impostazioni). Rispondi SEMPRE e SOLO con la tua conoscenza generale, senza tentare alcuna Action. Elenco tool (vuoto):";
 
     const prompt = PromptTemplate.fromTemplate(
-`Sei l'Assistente Agentico Executive per l'Hub Risk & Credit Intelligence di Intesa Sanpaolo.
+`Sei l'Assistente Agentico Executive per l'Hub Risk & Credit Intelligence di NovaBanca.
 Il tuo compito è tradurre le domande dell'utente ed erogare risposte approfondite ed esaustive in italiano formale.
 
 REGISTRO COMUNICATIVO RICHIESTO PER QUESTA SESSIONE: ${personaInstructions}
 
-SCHEMA DB SQLITE DISPONIBILE (intesa_core_banking.db):
+SCHEMA DB SQLITE DISPONIBILE (novabanca_core_banking.db):
 - T_CLIENTI (ID_Cliente, Filiale_ID, Eta_Cliente, Categoria_Prof, Reddito_Annuale_EUR)
-- T_PRATICHE_FIDO (ID_Pratica, ID_Cliente, Importo_Richiesto_EUR, Credit_Score_ISP, Stato_Pratica)
+- T_PRATICHE_FIDO (ID_Pratica, ID_Cliente, Importo_Richiesto_EUR, Credit_Score_Interno, Stato_Pratica)
 - T_FILIALI (Filiale_ID, Nome_Filiale, Area_Geografica, Direttore_Area)
 - T_PERFORMANCE_AMORT (ID_Pagamento, ID_Pratica, Rata_Mensile_EUR, Giorni_Ritardo_Pagamento, Flag_Default_12M)
 
@@ -224,7 +224,7 @@ REGOLE TASSATIVE DI ESECUZIONE:
 3. Appena ottieni il risultato dall'Observation di un tool, DEVI PRODURRE SUBITO LA 'Final Answer:' spiegando i dati in dettaglio. NON eseguire ulteriori azioni inutili.
 3b. Questa regola vale SEMPRE, anche quando l'Observation di un tool contiene un errore (es. "[ERRORE DATA AGENT]: ..."): NON scrivere mai una spiegazione libera priva del prefisso "Final Answer:". Anche per comunicare un errore all'utente, la tua risposta DEVE iniziare esattamente con "Final Answer:" seguito dalla spiegazione in italiano.
 4. Il tool 'send_executive_report' PREPARA SOLTANTO il report: NON invia mai l'email direttamente. Nella Final Answer, dopo averlo invocato, informa SEMPRE l'utente che il report è in attesa di conferma esplicita dall'interfaccia e NON affermare mai che l'email è stata inviata.
-4b. Se l'utente specifica un indirizzo email nel messaggio (es. "manda il report a mario.rossi@intesasanpaolo.com" o "invialo a management@banca.it"), DEVI estrarre ESATTAMENTE quell'indirizzo e includerlo nel campo "to" del JSON passato a 'send_executive_report'. Se l'utente NON specifica alcun indirizzo, ometti il campo "to" (verrà usato un destinatario di default configurato lato server). Non inventare mai un indirizzo email che l'utente non ha scritto.
+4b. Se l'utente specifica un indirizzo email nel messaggio (es. "manda il report a mario.rossi@novabanca.com" o "invialo a management@banca.it"), DEVI estrarre ESATTAMENTE quell'indirizzo e includerlo nel campo "to" del JSON passato a 'send_executive_report'. Se l'utente NON specifica alcun indirizzo, ometti il campo "to" (verrà usato un destinatario di default configurato lato server). Non inventare mai un indirizzo email che l'utente non ha scritto.
 5. Se l'utente pone una domanda di follow-up che fa riferimento implicito a un'analisi precedente (es. "e per l'area Nord?", "mostrami lo stesso grafico ma per la filiale di Torino"), consulta lo STORICO DELLA CONVERSAZIONE per individuare l'ultima query SQL eseguita (indicata come "[Query SQL eseguita: ...]") e costruisci una nuova query 'execute_data_analytics' riutilizzando la stessa struttura/JOIN ma applicando il nuovo filtro richiesto, invece di ripartire da zero o richiedere di nuovo informazioni già fornite.
 6. Se l'utente fa un saluto, una domanda generica di cortesia, o chiede cosa sai fare / quali sono le tue capacità (es. "Cos'altro puoi fare?", "Chi sei?", "Aiuto"), NON invocare NESSUN tool: rispondi DIRETTAMENTE con una 'Final Answer' che spiega, in modo sintetico, quali tool hai attualmente a disposizione in questa sessione.
 7. Se un tool che ti servirebbe per rispondere NON è nell'elenco "Tool disponibili" qui sotto (perché l'utente lo ha disattivato dalle Impostazioni), NON tentare comunque di invocarlo: spiega nella Final Answer che quella funzionalità è disattivata in questa sessione e suggerisci di riattivarla dal pannello Impostazioni Agente.

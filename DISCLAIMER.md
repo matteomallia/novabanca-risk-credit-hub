@@ -3,10 +3,10 @@
 ## Natura del progetto
 
 Questo repository è un **progetto didattico/dimostrativo**, sviluppato a scopo
-di apprendimento. Non è un prodotto ufficiale di Intesa Sanpaolo S.p.A., né è
+di apprendimento. Non è un prodotto ufficiale di NovaBanca S.p.A., né è
 in alcun modo affiliato, autorizzato, sponsorizzato o approvato dalla banca.
 
-Il nome "Intesa Sanpaolo" e la relativa identità visiva (colori, loghi
+Il nome "NovaBanca" e la relativa identità visiva (colori, loghi
 stilizzati) sono usati esclusivamente come **caso di studio realistico** per
 il progetto, come esplicitamente previsto dal brief del corso ("Scegli
 un'azienda reale [...] o un caso aziendale realistico ispirato a un'azienda
@@ -17,7 +17,7 @@ che conosci").
 Tutti i dati presenti in questo repository sono **interamente sintetici e
 fittizi**, generati a scopo dimostrativo:
 
-- Il dataset `data_agent/database/intesa_core_banking.db` (clienti, pratiche
+- Il dataset `data_agent/database/novabanca_core_banking.db` (clienti, pratiche
   di fido, filiali, performance di rimborso) **non contiene alcun dato reale**
   di persone, aziende o istituti di credito.
 - I documenti della Knowledge Base (`backend/docs/`) sono testi scritti a

@@ -11,13 +11,13 @@ export const InteractiveCanvas = ({ chartUrl, summaryText }) => {
     if (!chartUrl) return;
     const link = document.createElement('a');
     link.href = chartUrl;
-    link.download = `analisi_rischio_isp_${Date.now()}.png`;
+    link.download = `analisi_rischio_nvb_${Date.now()}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // Genera un report PDF one-pager con logo/intestazione ISP, il grafico e la
+  // Genera un report PDF one-pager con logo/intestazione NVB, il grafico e la
   // sintesi analitica testuale, pronto da archiviare o allegare manualmente.
   const handleExportPdf = async () => {
     if (!chartUrl || isExportingPdf) return;
@@ -45,7 +45,7 @@ export const InteractiveCanvas = ({ chartUrl, summaryText }) => {
       doc.setTextColor('#FFFFFF');
       doc.setFontSize(16);
       doc.setFont(undefined, 'bold');
-      doc.text('INTESA SANPAOLO', margin, 32);
+      doc.text('NOVABANCA', margin, 32);
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
       doc.text('Risk & Credit Intelligence Hub — Report Analitico', margin, 50);
@@ -82,7 +82,7 @@ export const InteractiveCanvas = ({ chartUrl, summaryText }) => {
       doc.setFontSize(8);
       doc.setTextColor('#999999');
       doc.text(
-        'Documento generato automaticamente da un agente AI — uso interno Intesa Sanpaolo.',
+        'Documento generato automaticamente da un agente AI — uso interno NovaBanca.',
         margin,
         pageHeight - 20
       );
@@ -141,7 +141,7 @@ export const InteractiveCanvas = ({ chartUrl, summaryText }) => {
           <div className={`w-full h-full flex items-center justify-center ${isFullscreen ? 'fixed inset-0 z-50 bg-brand-bg/95 p-8' : ''}`}>
             <img
               src={chartUrl}
-              alt="Grafico Analisi Rischio Credito ISP"
+              alt="Grafico Analisi Rischio Credito NVB"
               onError={() => setImageError(true)}
               className="max-h-full max-w-full object-contain rounded-lg shadow-md border border-brand-surfaceAlt transition-all duration-300"
             />

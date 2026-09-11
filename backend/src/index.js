@@ -46,7 +46,7 @@ process.on('uncaughtException', (err) => {
 // Inizializzazione della Knowledge Base e del Server Express
 async function initializeServer() {
     console.log("=================================================");
-    console.log("  INTESA SANPAOLO - RISK HUB BACKEND ORCHESTRATOR");
+    console.log("  NOVABANCA - RISK HUB BACKEND ORCHESTRATOR");
     console.log("=================================================");
 
     try {
@@ -419,7 +419,7 @@ app.post('/api/confirm-email', async (req, res) => {
 // Ticker di default mostrato sempre in TopBar (aggiornabile in futuro con una vera API di mercato)
 const DEFAULT_TICKER = [
     { symbol: 'FTSE MIB', price: '34.850,20', change: '+0.42%' },
-    { symbol: 'ISP.MI', price: '3.68 EUR', change: '+0.85%' },
+    { symbol: 'NVB.MI', price: '3.68 EUR', change: '+0.85%' },
     { symbol: 'EUR/USD', price: '1.0885', change: '-0.12%' },
     { symbol: 'BTP 10Y Yield', price: '3.54%', change: '-0.03%' }
 ];
@@ -429,7 +429,7 @@ app.get('/api/market-news', async (req, res) => {
     // è quella attesa da TopBar.jsx sul frontend.
     try {
         if (MARKETAUX_API_KEY && MARKETAUX_API_KEY !== 'your_marketaux_api_key_here') {
-            const url = `https://api.marketaux.com/v1/news/all?symbols=ISP.MI,FTSEMIB.MI&filter_entities=true&language=it&api_token=${MARKETAUX_API_KEY}`;
+            const url = `https://api.marketaux.com/v1/news/all?symbols=NVB.MI,FTSEMIB.MI&filter_entities=true&language=it&api_token=${MARKETAUX_API_KEY}`;
             const response = await axios.get(url);
             const news = (response.data.data || []).map(a => ({ title: a.title, source: a.source }));
             return res.status(200).json({ ticker: DEFAULT_TICKER, news });
@@ -438,7 +438,7 @@ app.get('/api/market-news', async (req, res) => {
                 ticker: DEFAULT_TICKER,
                 news: [
                     { title: "Borsa Milano tonica: FTSE MIB a 34.850pt (+0,42%)", source: "Ansa Borsa" },
-                    { title: "Intesa Sanpaolo (ISP.MI) tocca 3,68 EUR (+0,85%)", source: "Il Sole 24 Ore" },
+                    { title: "NovaBanca (NVB.MI) tocca 3,68 EUR (+0,85%)", source: "Il Sole 24 Ore" },
                     { title: "Banca d'Italia conferma la tenuta del CET1 ratio bancario", source: "Milano Finanza" }
                 ]
             });
@@ -449,7 +449,7 @@ app.get('/api/market-news', async (req, res) => {
             ticker: DEFAULT_TICKER,
             news: [
                 { title: "Indice FTSE MIB stazionario a 34.850pt (+0,42%)", source: "Market Live" },
-                { title: "Intesa Sanpaolo (ISP.MI): Solida posizione di capitale e tassi in linea", source: "ISP Research" }
+                { title: "NovaBanca (NVB.MI): Solida posizione di capitale e tassi in linea", source: "NVB Research" }
             ]
         });
     }

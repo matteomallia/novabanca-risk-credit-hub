@@ -1,7 +1,7 @@
 {
-  "name": "intesa-ai-hub-backend",
+  "name": "novabanca-risk-credit-hub-backend",
   "version": "1.0.0",
-  "description": "Backend Orchestrator Node.js con ReAct Self-Correction Loop, ChromaDB RAG e Nodemailer Mail Service per Intesa Sanpaolo Risk Hub",
+  "description": "Backend Orchestrator Node.js con ReAct Self-Correction Loop, ChromaDB RAG e Nodemailer Mail Service per NovaBanca Risk Hub",
   "main": "src/index.js",
   "type": "commonjs",
   "scripts": {

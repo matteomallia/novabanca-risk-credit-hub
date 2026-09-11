@@ -28,7 +28,7 @@ export default function App() {
   }, []);
 
   const handleEnterDefault = (userSession) => {
-    // Percorso "Accedi": tema ufficiale Intesa Sanpaolo di default
+    // Percorso "Accedi": tema ufficiale NovaBanca di default
     setTheme(DEFAULT_THEME);
     applyThemeToDocument(DEFAULT_THEME);
     saveTheme(DEFAULT_THEME);

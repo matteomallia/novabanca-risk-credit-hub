@@ -8,7 +8,7 @@ microservizi finale (`data_agent/`).
 
 Notebook (Google Colab) usato per **generare da zero** gli asset dati del
 progetto:
-- Il database SQLite `intesa_core_banking.db` (4 tabelle relazionali, 1200
+- Il database SQLite `novabanca_core_banking.db` (4 tabelle relazionali, 1200
   record), con iniezione controllata di dati "sporchi" (~10-12%): redditi
   mancanti, età mancanti, spazi superflui nelle categorie professionali,
   outlier sul Credit Score fuori dal range 300-850.

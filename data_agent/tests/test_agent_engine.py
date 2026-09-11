@@ -114,9 +114,9 @@ class TestCleanDataset:
         assert cleaned["Categoria_Prof"].iloc[0] == "Dirigente"
 
     def test_filters_credit_score_outliers(self, engine):
-        raw = pd.DataFrame({"Credit_Score_ISP": [650, 999, 100, 720]})
+        raw = pd.DataFrame({"Credit_Score_Interno": [650, 999, 100, 720]})
         cleaned = engine.clean_dataset(raw)
-        assert cleaned["Credit_Score_ISP"].between(300, 850).all()
+        assert cleaned["Credit_Score_Interno"].between(300, 850).all()
 
     def test_end_to_end_query_and_clean_on_temp_db(self, engine):
         # Verifica l'intero percorso: query validata -> esecuzione -> cleaning

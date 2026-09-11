@@ -4,7 +4,7 @@ import { ShieldCheck, LogIn, Palette, ArrowRight, Building2, User } from 'lucide
 const ROLES = ['Risk Officer', 'Manager', 'Analista Credito', 'Revisore'];
 
 // Landing page d'ingresso: due percorsi distinti.
-// - "Accedi": entra subito nell'Hub con il branding ufficiale Intesa Sanpaolo.
+// - "Accedi": entra subito nell'Hub con il branding ufficiale NovaBanca.
 // - "Configura il tuo Hub": apre il wizard di personalizzazione white-label
 //   (colori, logo testuale, nome azienda, dark/light) prima di entrare.
 //
@@ -21,12 +21,12 @@ export const LandingPage = ({ onEnterDefault, onOpenWizard }) => {
 
   return (
     <div className="min-h-screen bg-brand-bg text-brand-text flex flex-col items-center justify-center p-6">
-      {/* Logo / Mark ufficiale — resta sempre ISP qui, indipendentemente dal tema scelto dopo */}
+      {/* Logo / Mark ufficiale — resta sempre NVB qui, indipendentemente dal tema scelto dopo */}
       <div className="flex flex-col items-center mb-10 text-center">
-        <div className="bg-isp-blue p-4 rounded-2xl shadow-lg shadow-isp-blue/30 mb-4">
+        <div className="bg-nvb-blue p-4 rounded-2xl shadow-lg shadow-nvb-blue/30 mb-4">
           <ShieldCheck className="w-10 h-10 text-white" />
         </div>
-        <h1 className="text-2xl font-bold tracking-tight">INTESA SANPAOLO</h1>
+        <h1 className="text-2xl font-bold tracking-tight">NOVABANCA</h1>
         <p className="text-sm text-brand-textMuted mt-1">Risk & Credit Intelligence Hub</p>
       </div>
 
@@ -35,11 +35,11 @@ export const LandingPage = ({ onEnterDefault, onOpenWizard }) => {
         {/* BOX SINISTRA: Accedi */}
         <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 flex flex-col shadow-xl">
           <div className="flex items-center space-x-2 mb-1">
-            <LogIn className="w-5 h-5 text-isp-blue" />
+            <LogIn className="w-5 h-5 text-nvb-blue" />
             <h2 className="font-semibold text-base">Accedi</h2>
           </div>
           <p className="text-xs text-brand-textMuted mb-5">
-            Entra subito nell'Hub con il branding ufficiale Intesa Sanpaolo.
+            Entra subito nell'Hub con il branding ufficiale NovaBanca.
           </p>
 
           <form onSubmit={handleLogin} className="flex flex-col space-y-3 flex-1">
@@ -52,7 +52,7 @@ export const LandingPage = ({ onEnterDefault, onOpenWizard }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="es. Mario Rossi"
-                className="w-full bg-brand-surfaceAlt border border-brand-border rounded-lg px-3 py-2 text-xs text-brand-text placeholder-brand-textMuted focus:outline-none focus:border-isp-blue transition-colors"
+                className="w-full bg-brand-surfaceAlt border border-brand-border rounded-lg px-3 py-2 text-xs text-brand-text placeholder-brand-textMuted focus:outline-none focus:border-nvb-blue transition-colors"
               />
             </div>
             <div>
@@ -62,7 +62,7 @@ export const LandingPage = ({ onEnterDefault, onOpenWizard }) => {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full bg-brand-surfaceAlt border border-brand-border rounded-lg px-3 py-2 text-xs text-brand-text focus:outline-none focus:border-isp-blue transition-colors"
+                className="w-full bg-brand-surfaceAlt border border-brand-border rounded-lg px-3 py-2 text-xs text-brand-text focus:outline-none focus:border-nvb-blue transition-colors"
               >
                 {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
@@ -72,7 +72,7 @@ export const LandingPage = ({ onEnterDefault, onOpenWizard }) => {
 
             <button
               type="submit"
-              className="flex items-center justify-center space-x-2 bg-isp-blue hover:bg-isp-blue/90 text-white text-sm font-medium py-2.5 rounded-lg transition-colors shadow-md shadow-isp-blue/20"
+              className="flex items-center justify-center space-x-2 bg-nvb-blue hover:bg-nvb-blue/90 text-white text-sm font-medium py-2.5 rounded-lg transition-colors shadow-md shadow-nvb-blue/20"
             >
               <span>Accedi all'Hub</span>
               <ArrowRight className="w-4 h-4" />
@@ -86,7 +86,7 @@ export const LandingPage = ({ onEnterDefault, onOpenWizard }) => {
         {/* BOX DESTRA: Configura il tuo Hub */}
         <div className="bg-brand-surface border border-brand-border rounded-2xl p-6 flex flex-col shadow-xl">
           <div className="flex items-center space-x-2 mb-1">
-            <Palette className="w-5 h-5 text-isp-orange" />
+            <Palette className="w-5 h-5 text-nvb-orange" />
             <h2 className="font-semibold text-base">Configura il tuo Hub</h2>
           </div>
           <p className="text-xs text-brand-textMuted mb-5">
@@ -96,7 +96,7 @@ export const LandingPage = ({ onEnterDefault, onOpenWizard }) => {
 
           <div className="flex-1 flex flex-col justify-center items-center text-center space-y-4 py-4">
             <div className="grid grid-cols-3 gap-2">
-              <span className="w-8 h-8 rounded-full bg-isp-blue" title="Blu ISP" />
+              <span className="w-8 h-8 rounded-full bg-nvb-blue" title="Blu NVB" />
               <span className="w-8 h-8 rounded-full bg-emerald-600" title="Emerald Tech" />
               <span className="w-8 h-8 rounded-full bg-rose-700" title="Crimson Finance" />
             </div>
@@ -107,7 +107,7 @@ export const LandingPage = ({ onEnterDefault, onOpenWizard }) => {
 
           <button
             onClick={onOpenWizard}
-            className="flex items-center justify-center space-x-2 bg-isp-orange hover:bg-isp-orange/90 text-white text-sm font-medium py-2.5 rounded-lg transition-colors shadow-md shadow-isp-orange/20"
+            className="flex items-center justify-center space-x-2 bg-nvb-orange hover:bg-nvb-orange/90 text-white text-sm font-medium py-2.5 rounded-lg transition-colors shadow-md shadow-nvb-orange/20"
           >
             <span>Apri il Wizard di Personalizzazione</span>
             <ArrowRight className="w-4 h-4" />
