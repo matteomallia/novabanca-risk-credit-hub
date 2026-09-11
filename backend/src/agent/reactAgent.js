@@ -16,7 +16,13 @@ const {
     resolvePersona
 } = require('./agentConfigValidator');
 
-const DATA_AGENT_URL = process.env.DATA_AGENT_URL || 'http://data_agent:8000';
+// Render (fromService/hostport) restituisce solo "host:porta" senza schema;
+// Docker Compose invece usa il valore di default gia' completo di "http://".
+// Questa normalizzazione fa funzionare il codice identico in entrambi i casi.
+function withScheme(url) {
+    return /^https?:\/\//i.test(url) ? url : `http://${url}`;
+}
+const DATA_AGENT_URL = withScheme(process.env.DATA_AGENT_URL || 'http://data_agent:8000');
 const MARKETAUX_API_KEY = process.env.MARKETAUX_API_KEY;
 
 /**

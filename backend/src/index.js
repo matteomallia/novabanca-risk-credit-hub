@@ -23,7 +23,12 @@ const { getPendingEmail, resolvePendingEmail } = require('./services/pendingActi
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MARKETAUX_API_KEY = process.env.MARKETAUX_API_KEY;
-const DATA_AGENT_URL = process.env.DATA_AGENT_URL || 'http://data_agent:8000';
+// Render (fromService/hostport) restituisce solo "host:porta" senza schema;
+// Docker Compose invece usa il valore di default gia' completo di "http://".
+function withScheme(url) {
+    return /^https?:\/\//i.test(url) ? url : `http://${url}`;
+}
+const DATA_AGENT_URL = withScheme(process.env.DATA_AGENT_URL || 'http://data_agent:8000');
 const DOCS_DIR = path.resolve(__dirname, '../docs');
 const ALLOWED_DOC_EXTENSIONS = ['.pdf', '.txt', '.md'];
 
@@ -476,6 +481,30 @@ app.get('/api/kpis', async (req, res) => {
 // -----------------------------------------------------------------------------
 // Il frontend NON deve hardcodare modelli/tool/persona: li richiede sempre qui,
 // cosi' i due lati restano sempre sincronizzati con le whitelist reali del backend.
+// -----------------------------------------------------------------------------
+// PROXY GRAFICI: GET /static/charts/:filename
+// -----------------------------------------------------------------------------
+// In locale (Docker Compose) le immagini dei grafici sono servite direttamente
+// da Nginx, che proxa /static verso il Data Agent. In un deploy disaccoppiato
+// (es. Render, dove frontend è un sito statico senza Nginx davanti) questo
+// proxy applicativo fa la stessa cosa: il frontend chiede sempre le immagini
+// all'origin del backend (vedi resolveAssetUrl in frontend/src/config.js),
+// e qui le inoltriamo al Data Agent, che è l'unico a conoscerne il percorso.
+app.get('/static/charts/:filename', async (req, res) => {
+    try {
+        const safeFilename = path.basename(req.params.filename); // anti path-traversal
+        const response = await axios.get(`${DATA_AGENT_URL}/static/charts/${safeFilename}`, {
+            responseType: 'stream',
+            timeout: 10000
+        });
+        res.setHeader('Content-Type', response.headers['content-type'] || 'image/png');
+        response.data.pipe(res);
+    } catch (error) {
+        console.error('[Static Proxy] Impossibile recuperare il grafico dal Data Agent:', error.message);
+        res.status(404).send('Grafico non trovato o Data Agent non raggiungibile.');
+    }
+});
+
 app.get('/api/agent-config/options', (req, res) => {
     return res.status(200).json({
         models: AGENT_MODELS,

@@ -9,7 +9,12 @@ const { ChromaClient } = require('chromadb');
 
 // Cartella contenente i 3 documenti normativi della Knowledge Base
 const DOCS_DIR = path.resolve(__dirname, '../../docs');
-const CHROMADB_URL = process.env.CHROMADB_URL || 'http://chromadb:8000';
+// Render (fromService/hostport) restituisce solo "host:porta" senza schema;
+// Docker Compose invece usa il valore di default gia' completo di "http://".
+function withScheme(url) {
+    return /^https?:\/\//i.test(url) ? url : `http://${url}`;
+}
+const CHROMADB_URL = withScheme(process.env.CHROMADB_URL || 'http://chromadb:8000');
 const COLLECTION_NAME = 'novabanca_risk_knowledge_base';
 
 const embeddings = new OpenAIEmbeddings({

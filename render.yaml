@@ -75,12 +75,19 @@ services:
         value: "5000"
       - key: NODE_ENV
         value: production
-      # TODO dopo il primo deploy: sostituisci con l'hostname interno reale
-      # mostrato nella pagina del servizio "nvb-data-agent" / "nvb-chromadb"
+      # L'hostname interno reale su Render include un hash assegnato a runtime
+      # (es. nvb-data-agent-ab12:8000), diverso dal semplice nome del servizio
+      # usato in Docker Compose. fromService lo inietta automaticamente.
       - key: DATA_AGENT_URL
-        value: http://nvb-data-agent:8000
+        fromService:
+          type: web
+          name: nvb-data-agent
+          property: hostport
       - key: CHROMADB_URL
-        value: http://nvb-chromadb:8000
+        fromService:
+          type: web
+          name: nvb-chromadb
+          property: hostport
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL
