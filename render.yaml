@@ -75,19 +75,14 @@ services:
         value: "5000"
       - key: NODE_ENV
         value: production
-      # L'hostname interno reale su Render include un hash assegnato a runtime
-      # (es. nvb-data-agent-ab12:8000), diverso dal semplice nome del servizio
-      # usato in Docker Compose. fromService lo inietta automaticamente.
+      # IMPORTANTE: sul piano free di Render i servizi "web" possono INVIARE
+      # richieste sulla rete privata ma NON riceverle — quindi l'indirizzo
+      # interno (fromService/hostport) non funziona per raggiungerli. Unica
+      # via sul piano free: usare i loro URL pubblici HTTPS reali.
       - key: DATA_AGENT_URL
-        fromService:
-          type: web
-          name: nvb-data-agent
-          property: hostport
+        value: https://nvb-data-agent.onrender.com
       - key: CHROMADB_URL
-        fromService:
-          type: web
-          name: nvb-chromadb
-          property: hostport
+        value: https://nvb-chromadb.onrender.com
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL
