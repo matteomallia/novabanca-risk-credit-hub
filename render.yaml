@@ -24,9 +24,14 @@
 
 services:
   # ---------------------------------------------------------------------------
-  # 1. ChromaDB — Vector Store per il RAG (servizio privato, solo uso interno)
+  # 1. ChromaDB — Vector Store per il RAG
   # ---------------------------------------------------------------------------
-  - type: pserv
+  # NOTA: sul piano free di Render i "Private Service" (pserv) non sono
+  # disponibili — solo i "Web Service" pubblici lo sono. Questo significa che
+  # ChromaDB sarà raggiungibile pubblicamente (con un URL casuale, non protetto
+  # da autenticazione). Per un uso reale/sensibile, passare al piano Pro e
+  # tornare a "type: pserv" per tenerlo privato.
+  - type: web
     name: nvb-chromadb
     runtime: image
     image:
@@ -36,12 +41,14 @@ services:
         value: "TRUE"
       - key: PERSIST_DIRECTORY
         value: /chroma/chroma
+    healthCheckPath: /api/v2/heartbeat
     plan: free
 
   # ---------------------------------------------------------------------------
-  # 2. Data Agent Python — FastAPI, Pandas, Seaborn (servizio privato)
+  # 2. Data Agent Python — FastAPI, Pandas, Seaborn
   # ---------------------------------------------------------------------------
-  - type: pserv
+  # Stessa nota: pubblico per necessità del piano free, non per scelta.
+  - type: web
     name: nvb-data-agent
     runtime: docker
     rootDir: data_agent
@@ -51,6 +58,7 @@ services:
         value: "8000"
       - key: DB_PATH
         value: /app/database/novabanca_core_banking.db
+    healthCheckPath: /health
     plan: free
 
   # ---------------------------------------------------------------------------
