@@ -111,10 +111,15 @@ services:
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     envVars:
-      # TODO dopo il primo deploy del backend: incolla qui il suo URL pubblico
-      # (es. https://nvb-backend-xxxx.onrender.com), poi fai un redeploy manuale
+      # sync:false (non un "value" vuoto!): se fosse un value fisso, Render lo
+      # riapplicherebbe ad ogni sync del Blueprint, cancellando silenziosamente
+      # qualsiasi valore impostato a mano nella Dashboard. Con sync:false,
+      # Render lo chiede una volta sola e poi rispetta il valore impostato.
+      #
+      # Valore da inserire DOPO il primo deploy del backend: il suo URL
+      # pubblico, es. https://nvb-backend.onrender.com (SENZA slash finale).
       - key: VITE_API_BASE_URL
-        value: ""
+        sync: false
     routes:
       - type: rewrite
         source: /*
