@@ -9,12 +9,13 @@ import sys
 import sqlite3
 import tempfile
 
+import numpy as np
 import pandas as pd
 import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agent_engine import DataAgentEngine, UnsafeQueryError, validate_readonly_select  # noqa: E402
+from agent_engine import DataAgentEngine, UnsafeQueryError, QueryTimeoutError, validate_readonly_select  # noqa: E402
 
 
 # -----------------------------------------------------------------------------
@@ -170,3 +171,98 @@ class TestGenerateChart:
         output_path = str(tmp_path / "chart_bar.png")
         result_path = engine.generate_chart(df, "bar", "Test", output_path)
         assert os.path.exists(result_path)
+
+
+# -----------------------------------------------------------------------------
+# TEST: fix a seguito della revisione tecnica di Daniele Vergara e Lorenzo De Francesco
+# -----------------------------------------------------------------------------
+class TestSecondReviewFixes:
+
+    def test_credit_score_with_none_does_not_raise(self, engine):
+        """
+        Regressione (feedback Daniele): il vecchio filtro outlier usava un
+        lambda con confronti diretti (x < 300 or x > 850), fragile se x fosse
+        un None reale (TypeError). Il filtro vettoriale non deve mai sollevare
+        eccezioni, qualunque sia il contenuto della colonna.
+        """
+        raw = pd.DataFrame({"Credit_Score_Interno": [650, None, 999, np.nan, 100, 720]})
+        cleaned = engine.clean_dataset(raw)  # non deve sollevare TypeError
+        assert cleaned["Credit_Score_Interno"].between(300, 850).all()
+        assert cleaned["Credit_Score_Interno"].isna().sum() == 0
+
+    def test_with_recursive_is_rejected(self, engine):
+        """Regressione (feedback Lorenzo): le CTE ricorsive sono un vettore di DoS."""
+        with pytest.raises(UnsafeQueryError):
+            engine.execute_query(
+                "WITH RECURSIVE cnt(x) AS (SELECT 1 UNION ALL SELECT x+1 FROM cnt) "
+                "SELECT x FROM cnt"
+            )
+
+    def test_limit_is_injected_when_missing(self, engine):
+        """Regressione (feedback Lorenzo): una query senza LIMIT non deve poter
+        materializzare un result set arbitrariamente grande in RAM."""
+        df = engine.execute_query("SELECT * FROM T_TEST")
+        assert len(df) <= 5000  # MAX_RESULT_ROWS, qui comunque sotto soglia con soli 4 record
+
+    def test_existing_limit_is_not_duplicated(self, engine):
+        """Una query che ha già un LIMIT esplicito non deve essere alterata."""
+        df = engine.execute_query("SELECT * FROM T_TEST LIMIT 2")
+        assert len(df) == 2
+
+    def test_hist_on_non_numeric_column_raises_clear_error(self, engine):
+        """Regressione (feedback Lorenzo): chart_type e colonne sono scelti in
+        modo indipendente dall'LLM; un mismatch deve dare un errore chiaro,
+        non un crash generico né un grafico privo di senso."""
+        df = pd.DataFrame({"Area_Geografica": ["Nord", "Sud", "Nord", "Centro"]})
+        with pytest.raises(ValueError, match="istogramma"):
+            engine.generate_chart(df, "hist", "Test", "/tmp/test_hist_invalid.png")
+
+    def test_bar_chart_with_inverted_column_order_still_works(self, engine, tmp_path):
+        """Regressione (feedback Lorenzo): la query può restituire la colonna
+        numerica PRIMA di quella testuale; il grafico deve comunque avere senso
+        (valore sull'asse Y numerico), non semplicemente la prima colonna."""
+        df = pd.DataFrame({"Totale": [100, 200, 150], "Filiale": ["A", "B", "C"]})
+        output_path = str(tmp_path / "chart_inverted.png")
+        result_path = engine.generate_chart(df, "bar", "Test", output_path)
+        assert os.path.exists(result_path)
+
+    def test_bar_chart_with_only_text_column_uses_count_fallback(self, engine, tmp_path):
+        """Nessuna colonna numerica disponibile: deve usare il conteggio delle
+        occorrenze come fallback, invece di sollevare IndexError."""
+        df = pd.DataFrame({"Stato_Pratica": ["Approvata", "Approvata", "Rifiutata"]})
+        output_path = str(tmp_path / "chart_count_fallback.png")
+        result_path = engine.generate_chart(df, "bar", "Test", output_path)
+        assert os.path.exists(result_path)
+
+    def test_kpi_cache_returns_cached_result_within_ttl(self):
+        """Regressione (feedback Lorenzo): compute_kpis non deve rilanciare
+        5 query SQL ad ogni chiamata ravvicinata (es. polling della dashboard).
+        Usa il database reale (non la fixture T_TEST minimale) perché
+        compute_kpis interroga lo schema completo (T_PRATICHE_FIDO, ecc.)."""
+        real_db_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "database", "novabanca_core_banking.db"
+        )
+        if not os.path.exists(real_db_path):
+            pytest.skip("Database reale non presente in questo ambiente di test")
+        real_engine = DataAgentEngine(db_path=real_db_path)
+        first = real_engine.compute_kpis()
+        second = real_engine.compute_kpis()
+        assert first == second
+        assert real_engine._kpi_cache["data"] is not None
+
+    def test_query_timeout_interrupts_slow_query(self, engine):
+        """
+        Regressione (feedback Lorenzo): una query lenta deve essere interrotta,
+        non eseguita fino in fondo. Usa un timeout artificialmente basso per
+        non rallentare la suite (senza dover aspettare i 5s reali di produzione).
+        """
+        original_install = engine._install_query_timeout
+        engine._install_query_timeout = lambda conn, max_seconds=0.001: original_install(conn, max_seconds)
+        try:
+            with pytest.raises(QueryTimeoutError):
+                engine.execute_query(
+                    "SELECT COUNT(*) FROM T_TEST a, T_TEST b, T_TEST c, T_TEST d, T_TEST e"
+                )
+        finally:
+            engine._install_query_timeout = original_install
