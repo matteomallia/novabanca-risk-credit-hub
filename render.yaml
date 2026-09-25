@@ -79,10 +79,17 @@ services:
       # richieste sulla rete privata ma NON riceverle — quindi l'indirizzo
       # interno (fromService/hostport) non funziona per raggiungerli. Unica
       # via sul piano free: usare i loro URL pubblici HTTPS reali.
+      # NOTA: questi URL includono il suffisso casuale assegnato da Render
+      # (es. "-dqrt", "-u7y7") perché i nomi "puliti" (nvb-data-agent,
+      # nvb-chromadb) risultavano già occupati al momento della creazione di
+      # questo specifico account/deploy. Se in futuro ricrei i servizi da zero
+      # (nuovo account, servizi eliminati e riaggiunti), Render assegnerà quasi
+      # certamente un suffisso diverso: controlla gli URL reali sulla Dashboard
+      # di ciascun servizio e aggiorna questi due valori di conseguenza.
       - key: DATA_AGENT_URL
-        value: https://nvb-data-agent.onrender.com
+        value: https://nvb-data-agent-dqrt.onrender.com
       - key: CHROMADB_URL
-        value: https://nvb-chromadb.onrender.com
+        value: https://nvb-chromadb-u7y7.onrender.com
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL

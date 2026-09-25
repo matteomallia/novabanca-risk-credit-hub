@@ -55,8 +55,14 @@ def engine(temp_db_path):
 class TestValidateReadonlySelect:
 
     def test_accepts_simple_select(self):
+        # Da quando e' stato aggiunto il LIMIT di sicurezza automatico (feedback
+        # Lorenzo), una query senza LIMIT esplicito non resta piu' identica: viene
+        # arricchita con "LIMIT 5000". Il test verifica che il contenuto originale
+        # sia preservato e che il LIMIT sia stato aggiunto, non un'uguaglianza
+        # esatta ormai obsoleta.
         query = validate_readonly_select("SELECT * FROM T_TEST")
-        assert query == "SELECT * FROM T_TEST"
+        assert query.startswith("SELECT * FROM T_TEST")
+        assert "LIMIT" in query
 
     def test_accepts_with_cte(self):
         query = validate_readonly_select("WITH x AS (SELECT 1) SELECT * FROM x")
@@ -251,18 +257,35 @@ class TestSecondReviewFixes:
         assert first == second
         assert real_engine._kpi_cache["data"] is not None
 
-    def test_query_timeout_interrupts_slow_query(self, engine):
+    def test_query_timeout_interrupts_slow_query(self):
         """
         Regressione (feedback Lorenzo): una query lenta deve essere interrotta,
-        non eseguita fino in fondo. Usa un timeout artificialmente basso per
-        non rallentare la suite (senza dover aspettare i 5s reali di produzione).
+        non eseguita fino in fondo. Usa un timeout artificialmente basso per non
+        rallentare la suite (senza dover aspettare i 5s reali di produzione).
+
+        NOTA: usa il database REALE (1200 righe), non la fixture T_TEST minimale
+        (4 righe). Un cross join a 4 righe genera solo 4^n combinazioni: troppo
+        poco lavoro perche' il progress_handler di SQLite abbia la certezza di
+        scattare prima che la query finisca comunque da sola (dipende dai "passi"
+        di virtual machine SQLite eseguiti, non dal tempo — su un runner CI
+        veloce puo' completarsi prima del primo controllo). Con 1200 righe un
+        cross join a 3 vie supera 1.7 miliardi di combinazioni: abbastanza
+        pesante da garantire che il timeout scatti su qualunque ambiente.
         """
-        original_install = engine._install_query_timeout
-        engine._install_query_timeout = lambda conn, max_seconds=0.001: original_install(conn, max_seconds)
+        real_db_path = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "database", "novabanca_core_banking.db"
+        )
+        if not os.path.exists(real_db_path):
+            pytest.skip("Database reale non presente in questo ambiente di test")
+
+        real_engine = DataAgentEngine(db_path=real_db_path)
+        original_install = real_engine._install_query_timeout
+        real_engine._install_query_timeout = lambda conn, max_seconds=0.05: original_install(conn, max_seconds)
         try:
             with pytest.raises(QueryTimeoutError):
-                engine.execute_query(
-                    "SELECT COUNT(*) FROM T_TEST a, T_TEST b, T_TEST c, T_TEST d, T_TEST e"
+                real_engine.execute_query(
+                    "SELECT COUNT(*) FROM T_PRATICHE_FIDO a, T_PRATICHE_FIDO b, T_PRATICHE_FIDO c"
                 )
         finally:
-            engine._install_query_timeout = original_install
+            real_engine._install_query_timeout = original_install

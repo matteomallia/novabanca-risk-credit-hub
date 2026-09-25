@@ -185,8 +185,11 @@ class DataAgentEngine:
         def handler():
             return 1 if (time.monotonic() - start) > max_seconds else 0
 
-        # n=1000: SQLite richiama l'handler ogni 1000 "passi" della sua virtual machine
-        conn.set_progress_handler(handler, 1000)
+        # n=200 (ridotto da 1000 dopo un test CI fallito): SQLite richiama l'handler
+        # ogni 200 "passi" della sua virtual machine. Un valore piu' basso rende il
+        # timeout piu' reattivo/affidabile anche su query moderatamente piccole,
+        # con un overhead trascurabile per le query legittime.
+        conn.set_progress_handler(handler, 200)
 
     # -------------------------------------------------------------------------
     # 1. CLEANING ENGINE (Pandas)
