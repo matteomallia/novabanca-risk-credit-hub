@@ -15,7 +15,7 @@ import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agent_engine import DataAgentEngine, UnsafeQueryError, QueryTimeoutError, validate_readonly_select  # noqa: E402
+from agent_engine import DataAgentEngine, UnsafeQueryError, QueryTimeoutError, validate_readonly_select, normalize_sql  # noqa: E402
 
 
 # -----------------------------------------------------------------------------
@@ -289,3 +289,46 @@ class TestSecondReviewFixes:
                 )
         finally:
             real_engine._install_query_timeout = original_install
+
+
+# -----------------------------------------------------------------------------
+# TEST: cache dei risultati query separata dalla cache del grafico (feedback
+# Daniele, secondo giro di revisione)
+# -----------------------------------------------------------------------------
+class TestQueryResultCache:
+
+    def test_normalize_sql_collapses_whitespace_and_case(self):
+        """
+        Anche col solo fallback testuale (sqlglot non sempre disponibile), due
+        varianti banalmente diverse della stessa query devono normalizzarsi
+        alla stessa chiave.
+        """
+        a = normalize_sql("SELECT * FROM T_TEST")
+        b = normalize_sql("select   *   from   T_TEST")
+        assert a == b
+
+    def test_same_sql_with_different_chart_reuses_query_cache(self, engine):
+        """
+        Il cuore del feedback di Daniele: la stessa query SQL, usata per due
+        grafici diversi, deve risultare in UNA SOLA entry nella cache dei
+        risultati (non due), perché la chiave è solo l'SQL normalizzato,
+        senza chart_type/titolo.
+        """
+        sql = "SELECT * FROM T_TEST"
+        engine.execute_query(sql)
+        assert len(engine._query_cache) == 1
+
+        engine.execute_query(sql)  # stessa query, in un ipotetico secondo giro con grafico diverso
+        assert len(engine._query_cache) == 1  # non deve raddoppiare
+
+    def test_query_cache_returns_a_copy_not_shared_reference(self, engine):
+        """
+        Il DataFrame restituito dalla cache deve essere una copia indipendente:
+        modificarlo non deve corrompere l'entry in cache per le richieste successive.
+        """
+        sql = "SELECT * FROM T_TEST"
+        df1 = engine.execute_query(sql)
+        df1["Reddito_Annuale_EUR"] = 0  # mutazione locale, non deve propagarsi
+
+        df2 = engine.execute_query(sql)
+        assert not (df2["Reddito_Annuale_EUR"] == 0).all()

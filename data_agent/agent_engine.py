@@ -34,6 +34,28 @@ _FORBIDDEN_KEYWORDS = re.compile(
 
 _LIMIT_PATTERN = re.compile(r"\bLIMIT\s+\d+", re.IGNORECASE)
 
+
+def normalize_sql(query: str) -> str:
+    """
+    Feedback Daniele: la cache precedente usava il testo grezzo della query come
+    parte della chiave, quindi due query semanticamente identiche ma scritte in
+    modo leggermente diverso (spazi, maiuscole/minuscole, a-capo) risultavano
+    chiavi diverse -> cache miss evitabili. Usa sqlglot per fare il parsing della
+    query e rigenerarla in forma canonica (stessa formattazione per query
+    equivalenti), aumentando l'hit rate.
+
+    Fallback difensivo: se sqlglot non è installato o non riesce a fare il
+    parsing di un costrutto SQLite particolare, si ricade su una normalizzazione
+    puramente testuale (spazi collassati + maiuscolo) — meno efficace nel
+    massimizzare l'hit rate, ma sempre corretta e mai bloccante.
+    """
+    try:
+        import sqlglot
+        parsed = sqlglot.parse_one(query, read="sqlite")
+        return parsed.sql(dialect="sqlite")
+    except Exception:
+        return re.sub(r"\s+", " ", query.strip()).upper()
+
 # Cap di sicurezza sulle righe restituite: protegge da CROSS JOIN accidentali o query
 # malformate generate dall'LLM che altrimenti materializzerebbero l'intero result set
 # in RAM tramite pd.read_sql_query. Iniettato come LIMIT SQL (non un filtro post-hoc),
@@ -152,6 +174,8 @@ def _pick_chart_columns(df: pd.DataFrame, chart_type: str) -> dict:
 
 class DataAgentEngine:
     KPI_CACHE_TTL_SECONDS = 60
+    QUERY_CACHE_TTL_SECONDS = 60
+    QUERY_CACHE_MAX_ENTRIES = 100
 
     def __init__(self, db_path: str = "database/novabanca_core_banking.db"):
         """
@@ -161,6 +185,10 @@ class DataAgentEngine:
         if not os.path.exists(self.db_path):
             raise FileNotFoundError(f"Database SQLite non trovato nel percorso: {self.db_path}")
         self._kpi_cache = {"data": None, "timestamp": 0}
+        # Feedback Daniele: cache separata dal risultato finale (grafico incluso),
+        # cosi' la stessa query con un chart_type/titolo diverso riusa comunque il
+        # DataFrame gia' interrogato e pulito, invece di ripartire da zero dal DB.
+        self._query_cache: dict = {}
 
     def get_connection(self):
         """
@@ -256,8 +284,20 @@ class DataAgentEngine:
         """
         Esegue una query SQL multi-tabella sul DB relazionale e passa il risultato
         al motore di Data Cleaning prima di restituire il DataFrame pulito.
+
+        Cache separata dal risultato finale (feedback Daniele): la chiave è lo SQL
+        normalizzato via sqlglot, SENZA chart_type/chart_title. Questo permette di
+        riusare lo stesso DataFrame già pulito quando la stessa domanda viene posta
+        con un grafico diverso, che prima causava un cache miss completo pur
+        interrogando esattamente gli stessi dati.
         """
         safe_query = validate_readonly_select(query)
+        cache_key = normalize_sql(safe_query)
+
+        cached = self._query_cache.get(cache_key)
+        if cached and (time.monotonic() - cached["timestamp"]) < self.QUERY_CACHE_TTL_SECONDS:
+            return cached["df"].copy()  # copia difensiva: evita mutazioni accidentali sull'oggetto in cache
+
         conn = self.get_connection()
         try:
             self._install_query_timeout(conn)
@@ -279,6 +319,12 @@ class DataAgentEngine:
                 conn.set_progress_handler(None, 0)
 
             cleaned_df = self.clean_dataset(raw_df)
+
+            if len(self._query_cache) >= self.QUERY_CACHE_MAX_ENTRIES:
+                oldest_key = min(self._query_cache, key=lambda k: self._query_cache[k]["timestamp"])
+                del self._query_cache[oldest_key]
+            self._query_cache[cache_key] = {"df": cleaned_df.copy(), "timestamp": time.monotonic()}
+
             return cleaned_df
         finally:
             conn.close()

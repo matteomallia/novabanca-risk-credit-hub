@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any
-from agent_engine import DataAgentEngine, UnsafeQueryError, QueryTimeoutError
+from agent_engine import DataAgentEngine, UnsafeQueryError, QueryTimeoutError, normalize_sql
 
 # Inizializzazione applicazione FastAPI
 app = FastAPI(
@@ -92,13 +92,23 @@ async def on_startup():
 # Redis diventa necessario solo con più istanze del Data Agent in parallelo
 # (cache condivisa tra processi): con un solo processo (il caso attuale, anche
 # in deploy) una cache locale è equivalente in efficacia e più semplice.
+#
+# Feedback Daniele (secondo giro): questa cache di risposta completa include
+# chart_type/chart_title nella chiave, quindi resta comunque "stretta" (utile
+# solo per una richiesta identica in tutto, grafico compreso — evita persino
+# di ri-renderizzare l'immagine). Il vero aumento di hit rate avviene un
+# livello più sotto: DataAgentEngine.execute_query() ha una SUA cache separata,
+# chiave = solo SQL normalizzato via sqlglot (senza chart_type/titolo), così la
+# stessa domanda con un grafico diverso riusa comunque il DataFrame già pulito
+# invece di re-interrogare il database. Qui riusiamo la stessa normalize_sql()
+# per coerenza, cosi' le due cache condividono la stessa nozione di "stessa query".
 _analyze_cache: Dict[str, Dict[str, Any]] = {}
 ANALYZE_CACHE_TTL_SECONDS = 120
 ANALYZE_CACHE_MAX_ENTRIES = 200
 
 
 def _cache_key(request: "AnalyzeRequest") -> str:
-    raw = f"{request.query_sql}|{request.chart_type}|{request.chart_title}"
+    raw = f"{normalize_sql(request.query_sql)}|{request.chart_type}|{request.chart_title}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
