@@ -307,19 +307,47 @@ class TestQueryResultCache:
         b = normalize_sql("select   *   from   T_TEST")
         assert a == b
 
-    def test_same_sql_with_different_chart_reuses_query_cache(self, engine):
+    def test_same_sql_actually_served_from_cache_and_chart_still_valid(self, engine, monkeypatch, tmp_path):
         """
-        Il cuore del feedback di Daniele: la stessa query SQL, usata per due
-        grafici diversi, deve risultare in UNA SOLA entry nella cache dei
-        risultati (non due), perché la chiave è solo l'SQL normalizzato,
-        senza chart_type/titolo.
+        Feedback Daniele (ultimo giro): la versione precedente di questo test
+        verificava solo che la cache non raddoppiasse di dimensione — non
+        dimostrava che la seconda chiamata venisse DAVVERO servita dalla cache
+        (anziché ri-interrogare il DB per puro caso con lo stesso risultato),
+        né che il dato recuperato dalla cache fosse ancora valido per produrre
+        un grafico corretto.
+
+        Qui si monkeypatcha pd.read_sql_query per contare le interrogazioni
+        REALI al database: con due chiamate a execute_query() sulla stessa
+        query, il conteggio deve restare a 1. Si verifica inoltre che il
+        DataFrame servito dalla cache produca comunque un grafico valido.
         """
+        import agent_engine as ae_module
+
+        call_count = {"n": 0}
+        original_read_sql = ae_module.pd.read_sql_query
+
+        def counting_read_sql(*args, **kwargs):
+            call_count["n"] += 1
+            return original_read_sql(*args, **kwargs)
+
+        monkeypatch.setattr(ae_module.pd, "read_sql_query", counting_read_sql)
+
         sql = "SELECT * FROM T_TEST"
-        engine.execute_query(sql)
+        df_fresh = engine.execute_query(sql)    # 1a chiamata: query reale sul DB
+        df_cached = engine.execute_query(sql)   # 2a chiamata: deve arrivare dalla cache
+
+        assert call_count["n"] == 1, (
+            "la seconda chiamata ha ri-eseguito la query sul database invece di "
+            "essere servita dalla cache"
+        )
+        assert df_fresh.equals(df_cached)
         assert len(engine._query_cache) == 1
 
-        engine.execute_query(sql)  # stessa query, in un ipotetico secondo giro con grafico diverso
-        assert len(engine._query_cache) == 1  # non deve raddoppiare
+        # Il dato servito dalla cache deve restare utilizzabile per generare un
+        # grafico corretto, non solo per un confronto tra DataFrame
+        chart_path = str(tmp_path / "chart_from_cache.png")
+        result_path = engine.generate_chart(df_cached.copy(), "bar", "Test", chart_path)
+        assert os.path.exists(result_path)
 
     def test_query_cache_returns_a_copy_not_shared_reference(self, engine):
         """
